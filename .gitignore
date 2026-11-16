@@ -1,0 +1,18 @@
+# 원본 사진, 다운로드, 토큰 포함 목록, 큰 분석 원본은 올리지 않는다
+analysis/html/
+analysis/parsed.json
+posts/*/latest3/
+posts/*/common_src/
+posts/*/*/src/
+posts/*/*/mybox/
+posts/*/*/gif/
+posts/*/*/img/
+posts/*/*/*.jpg
+posts/*/*/doc.json
+posts/*/*/tpl.json
+tools/eyes
+*.png
+*.jpg
+*.gif
+.DS_Store
+__pycache__/
