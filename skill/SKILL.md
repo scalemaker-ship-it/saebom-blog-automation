@@ -91,7 +91,7 @@ description: >-
 
 ## 4. 사진
 
-- 원본: 네이버 마이박스 공유 폴더 (이레필름, 2026-10-15 촬영) (링크는 로컬 스킬에만 보관) → 사진/1번캠, 2번캠 JPG 649장. 원장별 번호(목록 순번): 오명훈 단독 79~88, 127~143, 465~570 / 김샛별 48~78, 144~157, 372~464 / 두 원장 89~126, 571~609 / 진료실, 시술실, 장비 158~290 / 대기실, 인증패 291~370, 610~648.
+- 원본: 네이버 마이박스 공유 폴더 (이레필름, 2026-10-15 촬영) `(마이박스 공유 링크: 로컬 스킬에만 있음)` → 사진/1번캠, 2번캠 JPG 649장. 원장별 번호(목록 순번): 오명훈 단독 79~88, 127~143, 465~570 / 김샛별 48~78, 144~157, 372~464 / 두 원장 89~126, 571~609 / 진료실, 시술실, 장비 158~290 / 대기실, 인증패 291~370, 610~648.
 - 받는 법: 마이박스 탭에서 `api.mybox.naver.com/service/link/folder/list?shareKey=..&resourceKey=..&startNum=&pagingRow=` 로 목록(resourceNo 는 정규식으로 문자열 추출, JS 숫자 정밀도 깨짐), `thumb2.photo.mybox.naver.com/<resourceNo>?type=m1280_1280_2&shared_url=<authToken>` 을 fetch → blob 다운로드(~/Downloads). 최대 1280px. 번호 붙은 접촉 시트를 만들어 고른다. 목록 JSON 에는 토큰이 있으니 레포에 올리지 않는다.
 - https 페이지에서 127.0.0.1 로 fetch/POST 는 막힌다 (Local Network Access). 파일은 다운로드나 `<input type=file>` + `chrome_upload_file` 로 옮긴다.
 - **눈 감은 사진 제외 (2026-11-17 지시)**: `tools/eyes <파일들>` (macOS Vision) → L, R 중 작은 값 < 0.22 이면 제외. 0.22~0.25 는 확대해서 눈으로 확인하고, 아래를 내려다보는 컷은 눈을 뜬 것으로 보여도 뺀다. 아래를 보는 사진(차트 보는 컷)이 자주 걸린다.
@@ -105,24 +105,29 @@ description: >-
 
 ## 5. 에디터 조립 (postwrite)
 
-1. `chrome_navigate https://blog.naver.com/saebom_clinic/postwrite?categoryNo=<23|13>` (newTab, 글마다 lane 다르게). 「작성 중인 글이 있습니다」 팝업이면 **취소**.
-2. JS: `HTMLInputElement.prototype.click` 을 file 타입만 삼키게 패치, 숨은 input `#__docfile`, `#__u1..#__u12` 생성.
+1. `chrome_navigate https://blog.naver.com/saebom_clinic/postwrite?categoryNo=<번호>` (newTab, 글마다 lane 다르게, 재시도마다 lane 이름도 새로: p1v10, p2v9 ...). 카테고리: 원장님 소개(오명훈 피부) = 8, 질필러 = 28, 질건조증 = 13. 글쓰기 주소가 `nid.naver.com/nidlogin` 으로 넘어가면 로그아웃 상태: 그 탭을 `chrome_switch_tab` 으로 앞에 띄우고 사람에게 로그인을 요청한 뒤 멈춘다. 「작성 중인 글이 있습니다」 팝업이면 **취소**.
+2. JS: `HTMLInputElement.prototype.click` 을 file 타입만 삼키게 패치, 숨은 input `#__docfile`, `#__u1..#__u16` 생성(이미지 수만큼, 1번 글 16장, 2번 글 13장). 올리는 순서 = 글 안 이미지 순서(thumb 가 1번).
 3. `chrome_upload_file` 로 사진, GIF 를 `#__u1..` 에 하나씩, doc.json 을 `#__docfile` 에.
 4. JS: `.se-image-toolbar-button` 클릭 → `#hidden-file` 에 DataTransfer 로 전부 넣고 change → 「사진 첨부 방식」 창에서 `label.se-image-type-label` 「개별사진」 클릭 → image 컴포넌트 path 가 다 찰 때까지 대기.
 5. 마지막 빈 문단을 **실제 클릭**(chrome_click_element 좌표)한 뒤, JS 로 SE 입력 iframe(`document.activeElement.contentDocument`)에 URL `ClipboardEvent('paste')` → 같이 읽기 2개, 유튜브 순서로 붙인다 (각 6.5초 대기). oglinkSign 이 붙은 링크카드/oembed 가 생긴다. 링크카드는 직접 JSON 으로 만들 수 없다(서명).
-6. `tools/assemble.js` 내용을 chrome_javascript 로 실행 → 자리표시자 치환(이미지 fileName, 링크카드 순서, 유튜브), 링크카드 `align:center, layout:large_image`, 01 만 `represent:true` → `setDocumentData`.
-7. `button.save_btn__FuUyN` 클릭 → 「임시저장이 완료되었습니다.」 확인. 끝나면 `delete HTMLInputElement.prototype.click`.
+6. `tools/assemble.js` 내용을 chrome_javascript 로 실행 → 자리표시자 치환(이미지 fileName, 링크카드 순서, 유튜브), 링크카드 `align:center, layout:large_image`, 대표는 `thumb`(THUMB_IMG 없으면 01) 하나만 `represent:true` → `setDocumentData`.
+7. 태그: 발행 패널(`publish_fold_btn__SE02d`)을 열어 `#tag-input` 에 content.py TAGS 5개를 하나씩 입력 + Enter, **발행 버튼은 절대 누르지 않고** 패널을 닫는다. 그다음 `button.save_btn__FuUyN` 클릭 → 「임시저장이 완료되었습니다.」 확인. 끝나면 `delete HTMLInputElement.prototype.click`.
 
 함정
 - 임시저장 목록의 삭제 버튼은 **네이티브 confirm** 을 띄워 그 탭의 모든 MCP 호출이 멈춘다. 지울 땐 사람에게 맡기거나 미리 알린다.
 - MCP 는 오래 안 쓴 탭을 정리한다(탭 id 가 사라짐). 탭이 없으면 새로 연다.
+- **작업 중 네이버 로그아웃**: 에디터에 「로그인이 필요합니다. 로그인이 해제되어 로그인 페이지로 이동합니다.」 창이 뜨면 JS 가 시간 초과로 멈춘다. 그 탭은 **저장 불가** (확인을 누르면 내용이 사라진다). 확인을 누르지 말고 사람에게 로그인을 요청, 로그인 뒤 새 탭에서 1번부터 다시 조립한다. 이미지, doc.json 은 그대로 다시 쓰면 된다. `document.cookie` 로는 로그인 여부를 알 수 없다(NID_AUT 는 httpOnly). 글쓰기 주소를 새 탭으로 열어 리다이렉트되는지로 확인한다.
+- 재저장할 때마다 새 임시저장이 따로 생긴다. 보고에 「지워도 되는 옛 임시저장 시각」을 글별로 적는다.
+- 조립 전에 블로그 탭 목록을 보고 같은 제목이 이미 **발행**돼 있으면(예: 질필러 224481185252) 사람에게 알린다. 발행본은 임시저장으로 고쳐지지 않는다.
 - chrome_javascript 는 60초 제한. 업로드 대기, 붙여넣기는 나눠서 부른다.
 
 ## 6. 검수 (90% 이상이어야 끝)
 
-에디터 `getDocumentData()` 로 확인: 제목 = 노션 제목 / 대표 01 / 사진 1:1, 중복 0, 눈 감은 사진 0 / GIF 2(남자 원장) / 목차 4항목 = 소제목 / 표 3개 이상 / FAQ 3 / 링크카드 2 가운데 + 유튜브 / 예약, 카톡, 진료시간 표 제목, 지도 / 금지 문자, 표현 0 / 임시저장 목록에 시각 표시. 확인 안 된 의학 문장은 보고에 따로 적는다.
+에디터 `getDocumentData()` 로 확인: 제목 = 노션 제목 / 대표 01 / 사진 1:1, 중복 0, 눈 감은 사진 0 / GIF 2(남자 원장) / 목차 4항목 = 소제목 / 표 3개 이상 / FAQ 3 / 링크카드 2 가운데 + 유튜브 / 예약, 카톡, 진료시간 표 제목, 지도 / 금지 문자, 표현 0 / 임시저장 목록에 시각 표시. 확인 안 된 의학 문장은 보고에 따로 적는다. 본문 표, 문장 중 병원 시설이나 진행 방식을 단정하는 것(「독립된 1인실에서 제가 직접 진행」, 「시술 시간 20분 정도」, 성분 작용 설명)은 출처 글 번호와 함께 「유지 여부 확인 필요」로 적는다. 사진 자막은 3-3 팩트 라벨 규칙을 다시 대조한다.
 
 ## 7. 보고
+
+**보고와 작업 중 짧은 안내는 전부 한글로 쓴다 (2026-11-18 지적: 영어로 보고해서 다시 지시받음).** 표 머리글, 상태 문구도 한글. 저장 못 했으면 「저장 안 됨」을 첫 줄에 쓴다.
 
 글별로 제목, 사진 수, 공백 제외 글자수, 키워드 횟수, 확인이 필요한 문장, 임시저장 시각. 발행은 사람이 한다고 적는다.
 
