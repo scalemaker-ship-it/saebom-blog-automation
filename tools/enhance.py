@@ -18,3 +18,8 @@ def pop(im, target=TARGET):
     im = ImageEnhance.Color(im).enhance(1.18)
     r = max(1.5, im.size[0] / 1400)
     return im.filter(ImageFilter.UnsharpMask(radius=r, percent=80, threshold=2))
+
+# 2026-11-18 사용자 확정: 모든 사진 보정은 bright.py (밝고 따뜻한 하이키 + 클래리티, 업스케일 금지) 로 통일
+from bright import bright as _bright
+def pop(im, target=None):
+    return _bright(im)

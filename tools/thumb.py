@@ -9,6 +9,7 @@ from enhance import pop
 F = os.path.expanduser('~/Library/Fonts/')
 N = 3840
 def make(src, fx, fy, side, text, out, fxr=0.6, fyr=0.3):
+    global N; N = min(3840, int(side))  # 2026-11-18: 원본보다 크게 늘리지 않는다
     im = Image.open(src).convert('RGB'); W, H = im.size
     x0 = int(min(max(0, fx - fxr * side), W - side)); y0 = int(min(max(0, fy - fyr * side), H - side))
     im = pop(im.crop((x0, y0, x0 + side, y0 + side)).resize((N, N), Image.LANCZOS))
