@@ -16,3 +16,4 @@ tools/eyes
 *.gif
 .DS_Store
 __pycache__/
+*.log
