@@ -17,3 +17,4 @@ tools/eyes
 .DS_Store
 __pycache__/
 *.log
+posts/*/orig/

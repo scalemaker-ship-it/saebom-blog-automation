@@ -22,7 +22,8 @@ def crop(src, dst, cx=None):
     elif fx is not None: c = fx
     else: c = W / 2
     x = int(min(max(c - s / 2, 0), W - s))
-    im = im.crop((x, 0, x + s, s)).resize((1080, 1080), Image.LANCZOS).filter(ImageFilter.UnsharpMask(radius=1.2, percent=60, threshold=2))
+    Z = int(os.environ.get('SQ', '1080'))  # 4K = SQ=3840 (2026-11-17)
+    im = im.crop((x, 0, x + s, s)).resize((Z, Z), Image.LANCZOS).filter(ImageFilter.UnsharpMask(radius=1.2 * Z / 1080, percent=60, threshold=2))
     im.save(dst, quality=92)
     return eye
 

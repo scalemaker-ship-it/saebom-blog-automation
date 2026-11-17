@@ -13,14 +13,19 @@ img{position:absolute;left:0;top:0;width:1080px;height:1080px}h1{position:absolu
 <img src="__IMG__"><h1>__T__</h1>__L__</body></html>'''
 
 def shot(html_path, png):
-    subprocess.run([CHROME, '--headless', '--disable-gpu', '--hide-scrollbars', '--allow-file-access-from-files', '--force-device-scale-factor=1',
-                    '--window-size=1080,1080', '--virtual-time-budget=3000', '--screenshot=' + png, 'file://' + html_path], capture_output=True)
+    subprocess.run([CHROME, '--headless', '--disable-gpu', '--hide-scrollbars', '--allow-file-access-from-files', '--force-device-scale-factor=%.4f' % SCALE,
+                    '--window-size=1080,1080', '--virtual-time-budget=5000', '--screenshot=' + png, 'file://' + html_path], capture_output=True)
 
+SCALE = 3840 / 1080  # 4K 출력 (2026-11-17 지시)
 def photo(n, cx, out):
+    """cx 는 1280px 미리보기 기준. 카메라 원본(posts/*/orig/DSCxxxx.JPG)이 있으면 원본에서 자른다."""
     f = glob.glob(os.path.join(POSTS, '*/*/sbpick_%s_*' % n)) + glob.glob(os.path.join(POSTS, '*/*/*/sbpick_%s_*' % n))
-    im = Image.open(f[0]).convert('RGB'); W, H = im.size
-    w = round(H * 620 / 1080); x0 = max(0, min(W - w, cx - w // 2))
-    im.crop((x0, 0, x0 + w, H)).resize((620, 1080), Image.LANCZOS).save(out, quality=95)
+    dsc = os.path.basename(f[0]).split('_', 2)[2]
+    o = glob.glob(os.path.join(POSTS, '*/orig/' + dsc))
+    im = Image.open(o[0] if o else f[0]).convert('RGB'); W, H = im.size
+    cx = cx * W / 1280
+    w = round(H * 620 / 1080); x0 = int(max(0, min(W - w, cx - w // 2)))
+    im.crop((x0, 0, x0 + w, H)).resize((round(620 * SCALE), 3840), Image.LANCZOS).save(out, quality=95)
 
 def main(d, spec):
     S = json.load(open(spec)); E = os.path.join(d, 'extra'); os.makedirs(E, exist_ok=True); P = S['prefix']
@@ -36,7 +41,7 @@ def main(d, spec):
         shot(h, os.path.join(E, f'card{k}.png'))
     order = ['med1', 'med2'] + ['card%d' % k for k in range(1, len(S['cards']) + 1)]  # extra1,2 = 의학, extra3~ = 카드
     for i, f in enumerate(order, 1):
-        Image.open(os.path.join(E, f + '.png')).convert('RGB').save(os.path.join(d, 'img', f'{P}_extra{i}.jpg'), quality=93)
+        Image.open(os.path.join(E, f + '.png')).convert('RGB').save(os.path.join(d, 'img', f'{P}_extra{i}.jpg'), quality=92)
     c = Image.new('RGB', (1080, 540 * ((len(order) + 1) // 2)))
     for i, f in enumerate(order): c.paste(Image.open(os.path.join(E, f + '.png')).resize((540, 540)), ((i % 2) * 540, (i // 2) * 540))
     c.save(os.path.join(E, '_sheet.jpg'))
