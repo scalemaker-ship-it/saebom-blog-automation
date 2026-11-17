@@ -96,6 +96,41 @@ def hours_table(title, kind):
     t['rows'] = out
     return regen(t)
 
+
+def ptxt(p): return ''.join(n.get('value', '') for n in p.get('nodes', []))
+
+def retext(comp, old, new):
+    for p in comp.get('value', []):
+        for n in p.get('nodes', []):
+            if n.get('value') == old: n['value'] = new
+
+def is_blank(p): return ptxt(p).strip() == ''
+
+def normalize_spacing(C, start, end):
+    """2026-11-17 사용자 지시: 이미지와 글 사이 줄간격은 항상 빈 줄 1칸.
+    본문 구간 C[start:end] 의 모든 이웃 사이를 빈 문단 1개로 맞춘다 (소제목 인용구 바로 다음 이미지, 이미지끼리는 붙임)."""
+    seg = []
+    for c in C[start:end]:
+        if c['@ctype'] == 'text':
+            v = list(c['value'])
+            while v and is_blank(v[0]): v.pop(0)
+            while v and is_blank(v[-1]): v.pop()
+            if not v: continue
+            c['value'] = v
+        seg.append(c)
+    out = []
+    for k, c in enumerate(seg):
+        if out:
+            a, b = out[-1], c
+            ta, tb = a['@ctype'], b['@ctype']
+            isimg = lambda t: t in ('__IMG__', 'image')
+            if not ((ta == 'quotation' and isimg(tb)) or (isimg(ta) and isimg(tb))):
+                if ta == 'text': a['value'].append(para(''))
+                elif tb == 'text': b['value'].insert(0, para(''))
+                else: out.append(empty())
+        out.append(c)
+    C[start:end] = out
+
 def img(prefix, n): return {"@ctype": "__IMG__", "fileName": f"{prefix}_{n}.{'gif' if str(n).startswith('gif') else 'jpg'}"}
 
 def build(c):
@@ -106,6 +141,7 @@ def build(c):
     C.append({"id": sid(), "layout": "default", "value": [para(l, 'center', 1.8) for l in c.TITLE_LINES] + [para('')], "@ctype": "text"})
     C.append(img(P, '01'))
     C.append(text(c.INTRO))
+    if getattr(c, 'INTRO_IMG', None): C.append(img(P, c.INTRO_IMG))  # 2026-11-17: 사진 2번 = 요약 카드뉴스
     C.append(toc([s['title'] for s in c.SECTIONS] + [f"{len(c.SECTIONS)+1}. 자주 묻는 질문"]))
     C.append(empty())
     for s in c.SECTIONS:
@@ -124,14 +160,22 @@ def build(c):
     faq = []
     for q, a in c.FAQ: faq += ["Gb|Q. " + q, "u|A. " + a, ""]
     C.append(text(faq + ["C25:Gb19|같이 읽기 좋은 글"]))
+    normalize_spacing(C, 2, len(C))
     C.append({"@ctype": "__OG1__"}); C.append({"@ctype": "__OG2__"})
     C.append(empty())
     if getattr(c, 'HAS_YT', True): C.append({"@ctype": "__YT__"}); C.append(empty())
     # 하단 고정부 (템플릿 35~52): 구분선, 예약, 전화, 카톡, 진료시간 표, 지도, 고지 이미지 2장
+    # 2026-11-17 사용자 수정본(224480990356) 반영: 👇 표기, 카톡 앞 구분선
     for i in range(35, 53):
         x = copy.deepcopy(T[i])
         if i == 45: x = hours_table(c.HOURS_TITLE, c.HOURS_KIND)
         elif x['@ctype'] != 'image': regen(x)
+        if i == 36: retext(x, '<네이버 예약 바로가기>', '👇네이버 예약 바로가기👇')
+        if i == 40:
+            x1 = copy.deepcopy(x); x1['value'] = [p for p in x1['value'] if '카카오톡' not in ptxt(p)] + [para('')]
+            x2 = copy.deepcopy(x); regen(x2); x2['value'] = [p for p in x2['value'] if '카카오톡' in ptxt(p)] + [para('')]
+            retext(x2, '<새봄의원 카카오톡>', '👇 새봄의원 카카오톡 👇')
+            C += [x1, regen(copy.deepcopy(T[35])), x2]; continue
         C.append(x)
     doc = {"document": {k: v for k, v in TPL['document'].items() if k != 'components'}}
     doc['document']['components'] = C
