@@ -14,9 +14,13 @@ def apply(src, dst, cap, bright=1.06, crop=0.02):
     if cap:
         f = ImageFont.truetype(FONT, int(W * 0.04)); d = ImageDraw.Draw(im, 'RGBA')
         l, t, r, b = d.textbbox((0, 0), cap, font=f); tw, th = r - l, b - t
-        px, py = int(W * 0.022), int(W * 0.014); x = (W - tw) // 2; y = H - int(H * 0.07) - th
-        d.rectangle((x - px, y - py + t, x + tw + px, y + th + py + t), fill=(0, 0, 0, 165))
-        d.text((x, y), cap, font=f, fill=(255, 255, 255, 255))
+        x = (W - tw) // 2; y = H - int(H * 0.07) - th
+        # 2026-11-18: 검은 배경 박스 제거 → 흰 글자 + 얇은 검정 외곽선 + 부드러운 그림자
+        from PIL import ImageFilter
+        sh = Image.new('L', im.size, 0); ImageDraw.Draw(sh).text((x, y + int(W * 0.003)), cap, font=f, fill=150, stroke_width=int(W * 0.004), stroke_fill=150)
+        sh = sh.filter(ImageFilter.GaussianBlur(W * 0.006)); im.paste((0, 0, 0), (0, 0), sh)
+        d = ImageDraw.Draw(im)
+        d.text((x, y), cap, font=f, fill=(255, 255, 255), stroke_width=max(2, int(W * 0.0018)), stroke_fill=(20, 20, 20))
     im.save(dst, quality=93)
 if __name__ == '__main__':
     d = sys.argv[1]; cf = os.path.join(d, 'captions.json')
