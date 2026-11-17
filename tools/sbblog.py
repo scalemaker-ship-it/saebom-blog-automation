@@ -142,7 +142,7 @@ def build(c):
     dt = copy.deepcopy(T[0]); dt['title'][0]['nodes'][0]['value'] = c.TITLE; C.append(regen(dt))
     C.append(empty())
     C.append({"id": sid(), "layout": "default", "value": [para(l, 'center', 1.8) for l in c.TITLE_LINES] + [para('')], "@ctype": "text"})
-    C.append(img(P, '01'))
+    C.append(img(P, getattr(c, 'THUMB_IMG', None) or '01'))  # 2026-11-17: 대표 썸네일(thumb.py) 있으면 맨 위, 01 은 본문으로
     C.append(text(c.INTRO))
     if getattr(c, 'INTRO_IMG', None): C.append(img(P, c.INTRO_IMG))  # 2026-11-17: 사진 2번 = 요약 카드뉴스
     C.append(toc([s['title'] for s in c.SECTIONS] + [f"{len(c.SECTIONS)+1}. 자주 묻는 질문"]))

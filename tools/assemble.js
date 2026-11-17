@@ -3,6 +3,7 @@
 // 결과: 자리표시자를 실제 컴포넌트로 바꿔 setDocumentData. 링크카드는 가운데 정렬 + large_image.
 const file = document.getElementById('__docfile').files[0];
 const nd = JSON.parse(await file.text());
+const HAS_THUMB = nd.document.components.some(c => c["@ctype"] === "__IMG__" && /_thumb\.jpg$/.test(c.fileName));
 const ds = SmartEditor._editors['blogpc001']._documentService;
 const cur = ds.getDocumentData();
 const imgs = {}, og = []; let yt = null;
@@ -16,7 +17,7 @@ const comps = nd.document.components.map(c => {
   const t = c['@ctype'];
   if (t === '__IMG__') {
     const im = imgs[c.fileName]; if (!im) { missing.push(c.fileName); return null; }
-    const x = JSON.parse(JSON.stringify(im)); x.align = 'center'; x.represent = /_01\.jpg$/.test(c.fileName); return x;
+    const x = JSON.parse(JSON.stringify(im)); x.align = 'center'; x.represent = HAS_THUMB ? /_thumb\.jpg$/.test(c.fileName) : /_01\.jpg$/.test(c.fileName); return x;
   }
   if (t === '__OG1__' || t === '__OG2__') {
     const o = og[t === '__OG1__' ? 0 : 1]; if (!o) { missing.push(t); return null; }

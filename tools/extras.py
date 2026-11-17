@@ -25,7 +25,8 @@ def photo(n, cx, out):
     im = Image.open(o[0] if o else f[0]).convert('RGB'); W, H = im.size
     cx = cx * W / 1280
     w = round(H * 620 / 1080); x0 = int(max(0, min(W - w, cx - w // 2)))
-    im.crop((x0, 0, x0 + w, H)).resize((round(620 * SCALE), 3840), Image.LANCZOS).save(out, quality=95)
+    from enhance import pop
+    pop(im.crop((x0, 0, x0 + w, H)).resize((round(620 * SCALE), 3840), Image.LANCZOS)).save(out, quality=95)
 
 def main(d, spec):
     S = json.load(open(spec)); E = os.path.join(d, 'extra'); os.makedirs(E, exist_ok=True); P = S['prefix']
