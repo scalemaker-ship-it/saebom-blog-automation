@@ -81,7 +81,7 @@ description: >-
 ## 3-3. 2026-11-17 추가 지시 (반드시 지킬 것)
 
 - **원장님이 운영하는 블로그다. 원장을 제3자처럼 쓰지 않는다.** 「오명훈 원장은 ~라고 이야기하는데요」 금지 → 「저는 ~」. 인사: 「안녕하세요. 광주 새봄여성의원에서 피부 진료를 맡고 있는 응급의학과 전문의 오명훈입니다.」 어미는 안내체(~습니다, ~인데요) 유지. 기준 원고 = `posts/2026-11/01_효천지구피부과추천/content.py` (v4).
-- **GIF 는 9:16.** 원본 = `bom/youtube/<편>/shorts/*.mp4` (1080x1920, 제목, 자막 포함). 1초 시트로 원장이 말하는 8초 구간을 골라 `ffmpeg -ss <t> -t 8 -vf "fps=10,scale=432:768,...palettegen 128"` (각 4MB 안팎). 가로 본편을 9:16 으로 자르면 자막이 잘린다.
+- **GIF 는 16:9 (2026-11-18 정정, 9:16 지시는 사용자 실수).** 원본 = 가로 본편 `bom/youtube/<편>/<편>.mp4` (1920x1080, 자막 포함) 를 자르지 않고 그대로. 1초 시트로 원장이 말하는 8초 구간을 골라 `ffmpeg -ss <t> -t 8 -i 소개.mp4 -vf "fps=10,scale=640:360:flags=lanczos,split[a][b];[a]palettegen=max_colors=128:stats_mode=diff[p];[b][p]paletteuse=dither=bayer:bayer_scale=4:diff_mode=rectangle" -loop 0 <접두어>_gif1.gif` (각 5~6MB, 720px 은 7MB 넘음). 효천지구 글 = 소개.mp4 213초(흉통 비유), 246초(기저력 질문).
 - **모든 글에서 같은 사진 중복 금지** (네이버 중복 이미지 판정). 사진마다 `tools/uniq_photo.py <글폴더> '{"01":"설명",...}'` 로 밝기 +6%, 테두리 2% 크롭, 가운데 하단 유튜브 자막식 설명 한 줄. 원본은 `img_orig/`. 카드뉴스는 합성물이라 그대로.
 - **4K 업로드.** 마이박스 웹 미리보기(1280px)를 키우지 말고 카메라 원본(7008x4672, 장당 8~21MB)을 받는다: 마이박스 공유 탭에서 `<a href="https://fs.mybox.naver.com/file/download.api?svcType=MYBOX-WEB&resourceKey=<key>" download>` 클릭(키 = mybox_jpg_list.json 의 key), 2.5초 간격 → ~/Downloads → `posts/YYYY-MM/orig/` (gitignore). 자르기 `SQ=3840 python3 tools/crop_square.py ...`, 카드와 의학 이미지는 `tools/extras.py` 가 3840 으로 렌더(원본 사진 자동 사용).
 - 카테고리 번호(categoryNo = 발행 패널 data-testid 번호): 원장님 소개 8, 진료일정 10, 부인과 클리닉 13, 부인과 검진 14, 질염/성병검진 16, 산전검사 17, 질레이저 18, 자궁경부암백신 19, 질필러 28, 피부과 클리닉 20, 리프팅 21, 보톡스 22, 토닝 23, 제모 24, 스킨부스터 25, 스킨케어 26. (예전 메모의 「피부 23」은 토닝이라 틀림)
@@ -95,9 +95,9 @@ description: >-
 - **눈 감은 사진 제외 (2026-11-17 지시)**: `tools/eyes <파일들>` (macOS Vision) → L, R 중 작은 값 < 0.22 이면 제외. 0.22~0.25 는 확대해서 눈으로 확인하고, 아래를 내려다보는 컷은 눈을 뜬 것으로 보여도 뺀다. 아래를 보는 사진(차트 보는 컷)이 자주 걸린다.
 - 1:1 크롭: `python3 tools/crop_square.py <img폴더> <접두어> 01=<원본> 02=<원본>@0.5 ...` (얼굴 가운데 기준, @비율로 직접 지정). 파일명 `<키워드붙여쓰기>_NN.jpg`, 01 = 대표(원장 얼굴).
 - 글당 8~9장, 한 글 안에서 같은 사진 중복 금지, 3편을 같이 만들면 서로 다른 컷.
-- **남자 원장 글 = 유튜브 GIF 2개 (2026-11-17 지시)**: 내용과 맞는 구간에서 원장이 화면에 나오는(컷어웨이 없는) 8초. 원본 = `bom/youtube/ep01_소개/소개.mp4` 등 편집본(자막 포함). 1초 간격 시트로 구간 찾기 → 자막 박스 폭 측정 → 1:1 크롭이 자막을 자르면 1170x1080 크롭 + 블러 배경으로 정사각. 480px, 10fps, 128색, 7MB 이하. 맞는 구간이 없으면 인사 장면(「안녕하세요 새봄의원 응급의학과 전문의 오명훈입니다」, ep01 0:10) GIF.
+- **남자 원장 글 = 유튜브 GIF 2개 (2026-11-17 지시)**: 내용과 맞는 구간에서 원장이 화면에 나오는(컷어웨이 없는) 8초. 원본 = `bom/youtube/ep01_소개/소개.mp4` 등 편집본(자막 포함). 1초 간격 시트로 구간 찾기 → 16:9 그대로 640x360, 10fps, 128색, 7MB 이하 (위 3-3 규칙). 맞는 구간이 없으면 인사 장면(「안녕하세요 새봄의원 응급의학과 전문의 오명훈입니다」, ep01 0:10) GIF.
   ```
-  ffmpeg -ss <초> -t 8 -i 소개.mp4 -vf "crop=1080:1080:<x>:0,fps=10,scale=480:480:flags=lanczos,split[a][b];[a]palettegen=max_colors=128:stats_mode=diff[p];[b][p]paletteuse=dither=bayer:bayer_scale=4:diff_mode=rectangle" -loop 0 <접두어>_gif1.gif
+  ffmpeg -ss <초> -t 8 -i 소개.mp4 -vf "fps=10,scale=640:360:flags=lanczos,split[a][b];[a]palettegen=max_colors=128:stats_mode=diff[p];[b][p]paletteuse=dither=bayer:bayer_scale=4:diff_mode=rectangle" -loop 0 <접두어>_gif1.gif
   ```
   content.py 에서 `("img", "gif1")` 로 넣는다.
 
