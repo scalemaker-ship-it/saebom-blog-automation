@@ -17,7 +17,7 @@ description: >-
 
 | 무엇 | 어디 |
 |---|---|
-| 키워드, 제목 (단일 출처) | 노션 「새봄여성의원ㅣ블로그 운영 페이지」 https://app.notion.com/p/3e3f456acb8a8015bb93f7b9edfc5e0c 의 월 토글 표 (NO./키워드/롱테일/제목). 표 순서대로, 제목은 한 글자도 바꾸지 않는다 |
+| 키워드, 제목 (단일 출처) | 노션 「새봄여성의원ㅣ블로그 운영 페이지」 (노션 링크: 로컬 스킬에만 있음) 의 월 토글 표 (NO./키워드/롱테일/제목). 표 순서대로, 제목은 한 글자도 바꾸지 않는다 |
 | 조립 도구 | `~/Desktop/kim/bom/blog/tools/` (sbblog.py, crop_square.py, eyes, assemble.js, tpl_picotoning.json) |
 | 글별 작업 폴더 | `~/Desktop/kim/bom/blog/posts/YYYY-MM/NN_키워드/` (content.py, img/, doc.json) |
 | 기준 원고 (2026-11-17 확정) | `posts/2026-11/01_효천지구피부과추천/content.py`, `02_광주질필러효과`, `03_광주질건조증치료` |

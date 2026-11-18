@@ -18,3 +18,8 @@ tools/eyes
 __pycache__/
 *.log
 posts/*/orig/
+
+# 키워드 목록, 키워드 분석은 올리지 않는다 (2026-11-18 지시)
+AI브리핑_*
+*키워드*
+columns/
