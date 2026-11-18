@@ -155,9 +155,9 @@ def build(c):
             elif kind == 'text': C.append(text(b[1]))
             elif kind == 'table': C.append(table(b[1], b[2]))
             elif kind == 'empty': C.append(empty())
-    C.append(quote("오늘 이야기를 정리하면"))
+    C.append(quote(c.SUMMARY_TITLE))  # 2026-11-18: 마무리 소제목은 글마다 다르게 (고정 문구 금지)
     C.append(text(c.SUMMARY))
-    C.append(img(P, c.SUMMARY_IMG))
+    if getattr(c, 'SUMMARY_IMG', None): C.append(img(P, c.SUMMARY_IMG))  # 2026-11-18: 본문 이미지 10장 제한, 정리 사진 생략 가능
     C.append(text(c.CTA))
     C.append(quote("자주 묻는 질문"))
     faq = []
