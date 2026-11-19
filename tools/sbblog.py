@@ -175,7 +175,8 @@ def build(c):
         elif x['@ctype'] != 'image': regen(x)
         if i == 36: retext(x, '<네이버 예약 바로가기>', '👇네이버 예약 바로가기👇')
         if i == 40:
-            x1 = copy.deepcopy(x); x1['value'] = [p for p in x1['value'] if '카카오톡' not in ptxt(p)] + [para('')]
+            # 2026-11-18: 내원/문의 유도 문구 금지 → 「예약과 문의는 ~」 문장 삭제
+            x1 = copy.deepcopy(x); x1['value'] = [p for p in x1['value'] if '카카오톡' not in ptxt(p) and '예약과 문의' not in ptxt(p)] + [para('')]
             x2 = copy.deepcopy(x); regen(x2); x2['value'] = [p for p in x2['value'] if '카카오톡' in ptxt(p)] + [para('')]
             retext(x2, '<새봄의원 카카오톡>', '👇 새봄의원 카카오톡 👇')
             C += [x1, regen(copy.deepcopy(T[35])), x2]; continue
